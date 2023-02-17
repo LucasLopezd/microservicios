@@ -39,6 +39,7 @@ public class AutenticadorJwt implements ReactiveAuthenticationManager {
                 .map(claims -> {
                     String username = claims.get("user_name", String.class);
                     List<String> roles = claims.get("authorities", List.class);
+
                     Collection<GrantedAuthority> authorities = roles
                             .stream()
                             .map(SimpleGrantedAuthority::new)
