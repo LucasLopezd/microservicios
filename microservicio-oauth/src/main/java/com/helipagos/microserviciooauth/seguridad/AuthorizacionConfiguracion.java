@@ -27,12 +27,6 @@ public class AuthorizacionConfiguracion extends AuthorizationServerConfigurerAda
 
     @Autowired
     private Environment env;
-
-    @Value("${api.oauth.configuracion.cliente.auth.tipo}")
-    private String tipoAutorizacion;
-    @Value("${api.oauth.configuracion.cliente.auth.token}")
-    private String actualizarToken;
-
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
@@ -46,10 +40,11 @@ public class AuthorizacionConfiguracion extends AuthorizationServerConfigurerAda
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory().withClient(env.getProperty("config.security.oauth.client.id"))
-                .secret(passwordEncoder.encode(env.getProperty("config.security.oauth.client.secret")))
+        clients.inMemory().withClient(env.getProperty("seguridad.oauth.cliente.id"))
+                .secret(passwordEncoder.encode(env.getProperty("seguridad.oauth.cliente.secreto")))
                 .scopes("read", "write")
-                .authorizedGrantTypes("password", "refresh_token")
+                .authorizedGrantTypes(env.getProperty("seguridad.oauth.grant-type"),
+                        env.getProperty("seguridad.oauth.refresh"))
                 .accessTokenValiditySeconds(3600)
                 .refreshTokenValiditySeconds(3600);
     }
@@ -74,7 +69,7 @@ public class AuthorizacionConfiguracion extends AuthorizationServerConfigurerAda
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter tokenConverter = new JwtAccessTokenConverter();
-        tokenConverter.setSigningKey(Base64.getEncoder().encodeToString(env.getProperty("config.security.oauth.jwt.key").getBytes()));
+        tokenConverter.setSigningKey(Base64.getEncoder().encodeToString(env.getProperty("seguridad.oauth.jwt.llave").getBytes()));
         return tokenConverter;
     }
 
