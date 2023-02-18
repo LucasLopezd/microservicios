@@ -12,25 +12,21 @@ import java.util.List;
 @Table(name = "estado_transaccion")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class EstadoTransaccion implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Double importe;
 
     @Enumerated(EnumType.STRING)
     private Estado descripcion;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "estado_id")
-    private List<Transaccion> transacciones;
-
-    public EstadoTransaccion(Double importe, Estado descripcion, Transaccion transaccion){
+    public EstadoTransaccion(Double importe, Estado descripcion){
         this.importe = importe;
         this.descripcion = descripcion;
-        this.transacciones = new ArrayList<>();
-        transacciones.add(transaccion);
     }
 }

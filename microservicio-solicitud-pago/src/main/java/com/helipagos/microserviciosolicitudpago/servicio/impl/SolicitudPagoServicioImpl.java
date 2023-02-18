@@ -2,8 +2,9 @@ package com.helipagos.microserviciosolicitudpago.servicio.impl;
 
 import com.helipagos.microserviciosolicitudpago.dto.CrearSolicitudPagoDto;
 import com.helipagos.microserviciosolicitudpago.dto.ModificarSolicitudPagoDto;
-import com.helipagos.microserviciosolicitudpago.entidad.EstadoPago;
 import com.helipagos.microserviciosolicitudpago.entidad.SolicitudPago;
+import com.helipagos.microserviciosolicitudpago.excepcion.ErrorPersistenciaExepcion;
+import com.helipagos.microserviciosolicitudpago.excepcion.RecursoNoEncontradoExcepcion;
 import com.helipagos.microserviciosolicitudpago.repositorio.SolicitudPagoRepositorio;
 import com.helipagos.microserviciosolicitudpago.servicio.IEstadoPagoServicio;
 import com.helipagos.microserviciosolicitudpago.servicio.ISolicitudPagoServicio;
@@ -22,35 +23,46 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
 
     @Override
     public SolicitudPago crear(CrearSolicitudPagoDto dto) {
-        SolicitudPago solicitud = new SolicitudPago();
+        try{
+            SolicitudPago solicitud = new SolicitudPago();
 
-        solicitud.setImporte(dto.getImporte());
-        solicitud.setDescripcion(dto.getDescripcion());
+            solicitud.setImporte(dto.getImporte());
+            solicitud.setDescripcion(dto.getDescripcion());
+            solicitud.setEstado(estadoServicio.crear(dto.getImporte()));
 
-        SolicitudPago nuevaSolicitud = repositorio.save(solicitud);
-        estadoServicio.crear(nuevaSolicitud);
-
-        return nuevaSolicitud;
+            return repositorio.save(solicitud);
+        }catch (Exception e){
+            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+        }
     }
 
     @Override
     public SolicitudPago modificarImporte(ModificarSolicitudPagoDto dto) {
-        SolicitudPago solicitud = buscarPorId(dto.getSolicitudId());
+        try{
+            SolicitudPago solicitud = buscarPorId(dto.getSolicitudId());
 
-        solicitud.setImporte(dto.getImporte());
-        estadoServicio.modificarImporte(dto.getImporte(), dto.getSolicitudId());
+            solicitud.setImporte(dto.getImporte());
+            estadoServicio.modificarImporte(dto.getImporte(), solicitud.getEstado().getId());
 
-        return repositorio.save(solicitud);
+            return repositorio.save(solicitud);
+        } catch (Exception e){
+            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+        }
     }
 
     @Override
     public void eliminar(Long id) {
-        repositorio.deleteById(id);
+        if(repositorio.existsById(id)){
+            repositorio.deleteById(id);
+        } else {
+            throw new RecursoNoEncontradoExcepcion("Solicitud no encontrada.");
+        }
     }
 
     @Override
     public SolicitudPago buscarPorId(Long id) {
-        return repositorio.findById(id).orElseThrow(() -> new RuntimeException("Solicitud no encontrada."));
+        return repositorio.findById(id).orElseThrow(
+                () -> new RecursoNoEncontradoExcepcion("Solicitud no encontrada."));
     }
 
     @Override
@@ -60,9 +72,14 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
 
     @Override
     public void actualizarSolicitud(boolean aprobacion, Long id) {
-        estadoServicio.actualizarEstado(aprobacion, id);
-        SolicitudPago solicitud = buscarPorId(id);
-        solicitud.setFecha(LocalDateTime.now());
-        repositorio.save(solicitud);
+        try{
+            SolicitudPago solicitud = buscarPorId(id);
+            estadoServicio.actualizarEstado(aprobacion, solicitud.getEstado().getId());
+            solicitud.setFecha(LocalDateTime.now());
+
+            repositorio.save(solicitud);
+        } catch (Exception e) {
+            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+        }
     }
 }

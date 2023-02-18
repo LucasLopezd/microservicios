@@ -3,6 +3,8 @@ package com.helipagos.microserviciosolicitudpago.servicio.impl;
 import com.helipagos.microserviciosolicitudpago.entidad.EstadoPago;
 import com.helipagos.microserviciosolicitudpago.entidad.SolicitudPago;
 import com.helipagos.microserviciosolicitudpago.enums.Estado;
+import com.helipagos.microserviciosolicitudpago.excepcion.ErrorPersistenciaExepcion;
+import com.helipagos.microserviciosolicitudpago.excepcion.RecursoNoEncontradoExcepcion;
 import com.helipagos.microserviciosolicitudpago.repositorio.EstadoPagoRepositorio;
 import com.helipagos.microserviciosolicitudpago.servicio.IEstadoPagoServicio;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +17,17 @@ public class EstadoPagoServicioImpl implements IEstadoPagoServicio {
     private final EstadoPagoRepositorio repositorio;
 
     @Override
-    public void crear(SolicitudPago solicitudPago) {
-        EstadoPago estadoPago = new EstadoPago();
+    public EstadoPago crear(Double importe) {
+        try{
+            EstadoPago estadoPago = new EstadoPago();
 
-        estadoPago.setImporte(solicitudPago.getImporte());
-        estadoPago.getSolicitudes().add(solicitudPago);
+            estadoPago.setImporte(importe);
+            estadoPago.setDescripcion(Estado.NUEVA);
 
-        repositorio.save(estadoPago);
+            return repositorio.save(estadoPago);
+        }catch (Exception e) {
+            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+        }
     }
 
     @Override
@@ -41,11 +47,6 @@ public class EstadoPagoServicioImpl implements IEstadoPagoServicio {
     @Override
     public EstadoPago buscarPorId(Long id) {
         return repositorio.findById(id).orElseThrow(
-                () -> new RuntimeException("Estado no encontrado."));
-    }
-
-    @Override
-    public String obtenerEstadoPorId(Long id) {
-        return buscarPorId(id).getDescripcion().name();
+                () -> new RecursoNoEncontradoExcepcion("Estado no encontrado."));
     }
 }

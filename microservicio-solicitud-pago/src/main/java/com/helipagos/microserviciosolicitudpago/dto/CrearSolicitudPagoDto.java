@@ -8,5 +8,6 @@ import lombok.Setter;
 public class CrearSolicitudPagoDto {
 
     private Double importe;
+
     private String descripcion;
 }
