@@ -1,5 +1,7 @@
 package com.helipagos.microserviciooauth.seguridad;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +16,10 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.util.Base64Utils;
 
+import javax.crypto.SecretKey;
 import java.util.Arrays;
-import java.util.Base64;
 
 @Configuration
 @EnableAuthorizationServer
@@ -37,7 +40,8 @@ public class AuthorizacionConfiguracion extends AuthorizationServerConfigurerAda
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory().withClient(env.getProperty("seguridad.oauth.cliente.id"))
+        clients.inMemory()
+                .withClient(env.getProperty("seguridad.oauth.cliente.id"))
                 .secret(passwordEncoder.encode(env.getProperty("seguridad.oauth.cliente.secreto")))
                 .scopes("read", "write")
                 .authorizedGrantTypes(env.getProperty("seguridad.oauth.grant-type"),
@@ -66,7 +70,9 @@ public class AuthorizacionConfiguracion extends AuthorizationServerConfigurerAda
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter tokenConverter = new JwtAccessTokenConverter();
-        tokenConverter.setSigningKey(Base64.getEncoder().encodeToString(env.getProperty("seguridad.oauth.jwt.llave").getBytes()));
+        tokenConverter.setSigningKey(
+                Base64Utils.encodeToString(
+                        env.getProperty("seguridad.oauth.jwt.llave").getBytes()));
         return tokenConverter;
     }
 
