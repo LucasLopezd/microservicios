@@ -7,16 +7,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @FeignClient(name = "servicio-solicitud-pago")
-public interface ISolicitudPagoRest {
+public interface ISolicitudPagoFeing {
 
     @GetMapping("/api/pagos/{id}")
-    public SolicitudPago buscarSolicitudPorId(@PathVariable Long id);
+    SolicitudPago buscarSolicitudPorId(@PathVariable Long id);
 
     @PutMapping("/api/pagos/{estado}/{id}")
-    public void actualizarSolicitudYEstado(@PathVariable Boolean estado, @PathVariable Long id);
+    void actualizarSolicitudYEstado(@PathVariable Boolean estado, @PathVariable Long id);
 
     @GetMapping("/api/estados/{id}")
-    public String buscarEstadoPorId(@PathVariable Long id);
-
+    String buscarEstadoPorId(@PathVariable Long id);
 
 }

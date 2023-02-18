@@ -1,38 +1,33 @@
 package com.helipagos.microserviciotransaccion.controlador;
 
 import com.helipagos.microserviciotransaccion.dto.TransaccionDto;
-import com.helipagos.microserviciotransaccion.entidad.Transaccion;
+import static com.helipagos.microserviciotransaccion.respuesta.ConstructorRespuesta.*;
 import com.helipagos.microserviciotransaccion.servicio.ITransaccionServicio;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/transacciones")
 public record TransaccionControlador(ITransaccionServicio servicio) {
 
     @PostMapping("/pagar")
-    @ResponseStatus(HttpStatus.OK)
-    public Transaccion realizarPago(@RequestBody TransaccionDto dto){
-        return servicio.realizarPago(dto);
+    public ResponseEntity<?> realizarPago(@RequestBody TransaccionDto dto){
+        return construirRespuesta(HttpStatus.OK, servicio.realizarPago(dto));
     }
 
     @PostMapping("/rechazar/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Transaccion rechazarPago(@PathVariable Long id){
-        return servicio.rechazarPago(id);
+    public ResponseEntity<?> rechazarPago(@PathVariable Long id){
+        return construirRespuesta(HttpStatus.OK, servicio.rechazarPago(id));
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Transaccion buscarPorId(@PathVariable Long id){
-        return servicio.buscarPorId(id);
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id){
+        return construirRespuesta(HttpStatus.OK, servicio.buscarPorId(id));
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<Transaccion> listar(){
-        return servicio.listar();
+    public ResponseEntity<?> listar(){
+        return construirRespuesta(HttpStatus.OK, servicio.listar());
     }
 }

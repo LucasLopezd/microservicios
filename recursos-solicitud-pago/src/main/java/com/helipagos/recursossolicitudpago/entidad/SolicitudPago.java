@@ -20,7 +20,13 @@ public class SolicitudPago implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Double importe;
+
     private String descripcion;
+
     private LocalDateTime fecha;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private EstadoPago estado;
 }

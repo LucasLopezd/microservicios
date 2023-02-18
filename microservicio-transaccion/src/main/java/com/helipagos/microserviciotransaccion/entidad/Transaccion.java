@@ -19,10 +19,14 @@ public class Transaccion implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Double importe;
+
     private LocalDateTime fecha;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private EstadoTransaccion estado;
 
     @Column(name = "solicitud_pago_id")
     private Long solicitudPagoId;
-
 }
