@@ -2,6 +2,7 @@ package com.helipagos.microserviciooauth.servicio;
 
 import com.helipagos.microserviciooauth.feing.UsuarioFeingCliente;
 import com.helipagos.recursosusuario.entidad.Usuario;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,18 +24,22 @@ public class UsuarioServicio implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = cliente.buscarPorUsername(username);
+        try{
+            Usuario usuario = cliente.buscarPorUsername(username);
 
-        if(Objects.isNull(usuario)){
+            if(Objects.isNull(usuario)){
+                throw new UsernameNotFoundException("Usuario no encontrado");
+            }
+
+            List<GrantedAuthority> roles = usuario.getRoles()
+                    .stream()
+                    .map(role -> new SimpleGrantedAuthority(role.getName()))
+                    .collect(Collectors.toList());
+
+            return new User(usuario.getUsername(), usuario.getPassword(), true, true,
+                    true, true, roles);
+        }catch (FeignException e){
             throw new UsernameNotFoundException("Usuario no encontrado");
         }
-
-        List<GrantedAuthority> roles = usuario.getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-        return new User(usuario.getUsername(), usuario.getPassword(), true, true,
-                true, true, roles);
     }
 }
