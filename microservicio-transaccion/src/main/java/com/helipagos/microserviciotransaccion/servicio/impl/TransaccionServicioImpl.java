@@ -34,6 +34,11 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
     @Override
     public Transaccion realizarPago(TransaccionDto dto) {
         try {
+            if(repositorioTransaccion.existsById(dto.getSolicitudId())){
+                throw new TransaccionInvalidaExcepcion(
+                        "Error: ya existe una transacción para el ID de la solicitud ingresada.");
+            }
+
             SolicitudPago solicitud = solicitudFeing.buscarSolicitudPorId(dto.getSolicitudId());
             Transaccion nuevaTransaccion = null;
 
@@ -49,9 +54,9 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
                 transaccion.setSolicitudPagoId(dto.getSolicitudId());
                 transaccion.setEstado(nuevoEstadoTransaccion);
 
-                repositorioTransaccion.save(transaccion);
+                nuevaTransaccion = repositorioTransaccion.save(transaccion);
 
-                solicitudFeing.actualizarSolicitudYEstado(true, dto.getSolicitudId());
+                solicitudFeing.actualizarSolicitudYEstado(Estado.PAGADA, dto.getSolicitudId());
 
             } else {
                 throw new TransaccionInvalidaExcepcion(
@@ -83,7 +88,7 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
 
                 nuevaTransaccion = repositorioTransaccion.save(transaccion);
 
-                solicitudFeing.actualizarSolicitudYEstado(false, id);
+                solicitudFeing.actualizarSolicitudYEstado(Estado.RECHAZADA, id);
 
             } else {
                 throw new TransaccionInvalidaExcepcion(

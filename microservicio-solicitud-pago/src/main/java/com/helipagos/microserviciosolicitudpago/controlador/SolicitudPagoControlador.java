@@ -3,6 +3,9 @@ package com.helipagos.microserviciosolicitudpago.controlador;
 import com.helipagos.microserviciosolicitudpago.dto.CrearSolicitudPagoDto;
 import com.helipagos.microserviciosolicitudpago.dto.ModificarSolicitudPagoDto;
 import static com.helipagos.microserviciosolicitudpago.respuesta.ConstructorRespuesta.*;
+
+import com.helipagos.microserviciosolicitudpago.entidad.SolicitudPago;
+import com.helipagos.microserviciosolicitudpago.enums.Estado;
 import com.helipagos.microserviciosolicitudpago.servicio.ISolicitudPagoServicio;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +40,12 @@ public record SolicitudPagoControlador(ISolicitudPagoServicio servicio) {
         return construirRespuesta(HttpStatus.OK, servicio.listar());
     }
 
-    @PutMapping("/{estado}/{id}")
-    public void actualizarSolicitudYEstado(@PathVariable Boolean aprobacion, @PathVariable Long id){
-        servicio.actualizarSolicitud(aprobacion, id);
+    @PutMapping("/feing/{estado}/{id}")
+    public void actualizarSolicitudYEstado(@PathVariable Estado estado, @PathVariable Long id){
+        servicio.actualizarSolicitud(estado, id);
+    }
+    @GetMapping("/feing/{id}")
+    public SolicitudPago buscarSolicitudPorIdFeing(@PathVariable Long id){
+        return servicio.buscarPorId(id);
     }
 }
