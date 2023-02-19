@@ -3,6 +3,7 @@ package com.helipagos.microserviciosolicitudpago.servicio.impl;
 import com.helipagos.microserviciosolicitudpago.dto.CrearSolicitudPagoDto;
 import com.helipagos.microserviciosolicitudpago.dto.ModificarSolicitudPagoDto;
 import com.helipagos.microserviciosolicitudpago.entidad.SolicitudPago;
+import com.helipagos.microserviciosolicitudpago.enums.Estado;
 import com.helipagos.microserviciosolicitudpago.excepcion.ErrorPersistenciaExepcion;
 import com.helipagos.microserviciosolicitudpago.excepcion.RecursoNoEncontradoExcepcion;
 import com.helipagos.microserviciosolicitudpago.repositorio.SolicitudPagoRepositorio;
@@ -71,10 +72,10 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
     }
 
     @Override
-    public void actualizarSolicitud(boolean aprobacion, Long id) {
+    public void actualizarSolicitud(Estado estado, Long id) {
         try{
             SolicitudPago solicitud = buscarPorId(id);
-            estadoServicio.actualizarEstado(aprobacion, solicitud.getEstado().getId());
+            estadoServicio.actualizarEstado(estado, solicitud.getEstado().getId());
             solicitud.setFecha(LocalDateTime.now());
 
             repositorio.save(solicitud);

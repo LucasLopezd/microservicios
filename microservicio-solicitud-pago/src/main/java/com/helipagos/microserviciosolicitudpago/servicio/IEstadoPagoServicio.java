@@ -1,6 +1,7 @@
 package com.helipagos.microserviciosolicitudpago.servicio;
 
 import com.helipagos.microserviciosolicitudpago.entidad.EstadoPago;
+import com.helipagos.microserviciosolicitudpago.enums.Estado;
 
 public interface IEstadoPagoServicio {
 
@@ -8,7 +9,7 @@ public interface IEstadoPagoServicio {
 
     void modificarImporte(Double importe, Long id);
 
-    void actualizarEstado(boolean aprobacion, Long id);
+    void actualizarEstado(Estado estado, Long id);
 
     EstadoPago buscarPorId(Long id);
 }

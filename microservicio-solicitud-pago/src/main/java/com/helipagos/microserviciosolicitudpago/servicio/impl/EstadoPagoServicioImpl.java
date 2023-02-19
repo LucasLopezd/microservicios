@@ -38,9 +38,9 @@ public class EstadoPagoServicioImpl implements IEstadoPagoServicio {
     }
 
     @Override
-    public void actualizarEstado(boolean aprobacion, Long id) {
+    public void actualizarEstado(Estado estado, Long id) {
         EstadoPago estadoPago = buscarPorId(id);
-        estadoPago.setDescripcion((aprobacion) ? Estado.PAGADA : Estado.RECHAZADA);
+        estadoPago.setDescripcion(estado);
         repositorio.save(estadoPago);
     }
 
