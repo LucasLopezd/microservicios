@@ -10,10 +10,14 @@ import com.helipagos.microserviciosolicitudpago.repositorio.SolicitudPagoReposit
 import com.helipagos.microserviciosolicitudpago.servicio.IEstadoPagoServicio;
 import com.helipagos.microserviciosolicitudpago.servicio.ISolicitudPagoServicio;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+
+import static com.helipagos.microserviciosolicitudpago.enums.CodigoError.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
 
     private final SolicitudPagoRepositorio repositorio;
     private final IEstadoPagoServicio estadoServicio;
+    private final MessageSource mensajero;
 
     @Override
     public SolicitudPago crear(CrearSolicitudPagoDto dto) {
@@ -33,7 +38,8 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
 
             return repositorio.save(solicitud);
         }catch (Exception e){
-            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+            throw new ErrorPersistenciaExepcion(
+                    mensajero.getMessage(PERSISTENCIA_ERROR.name(), null, Locale.getDefault()));
         }
     }
 
@@ -47,7 +53,8 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
 
             return repositorio.save(solicitud);
         } catch (Exception e){
-            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+            throw new ErrorPersistenciaExepcion(
+                    mensajero.getMessage(PERSISTENCIA_ERROR.name(), null, Locale.getDefault()));
         }
     }
 
@@ -56,14 +63,16 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
         if(repositorio.existsById(id)){
             repositorio.deleteById(id);
         } else {
-            throw new RecursoNoEncontradoExcepcion("Solicitud no encontrada.");
+            throw new RecursoNoEncontradoExcepcion(
+                    mensajero.getMessage(RECURSO_NO_ENCONTRADO.name(), new Object[] { id }, Locale.getDefault()));
         }
     }
 
     @Override
     public SolicitudPago buscarPorId(Long id) {
         return repositorio.findById(id).orElseThrow(
-                () -> new RecursoNoEncontradoExcepcion("Solicitud no encontrada."));
+                () -> new RecursoNoEncontradoExcepcion(
+                        mensajero.getMessage(RECURSO_NO_ENCONTRADO.name(), new Object[] { id }, Locale.getDefault())));
     }
 
     @Override
@@ -80,7 +89,8 @@ public class SolicitudPagoServicioImpl implements ISolicitudPagoServicio {
 
             repositorio.save(solicitud);
         } catch (Exception e) {
-            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+            throw new ErrorPersistenciaExepcion(
+                    mensajero.getMessage(PERSISTENCIA_ERROR.name(), null, Locale.getDefault()));
         }
     }
 }

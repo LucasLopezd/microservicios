@@ -1,20 +1,24 @@
 package com.helipagos.microserviciosolicitudpago.servicio.impl;
 
 import com.helipagos.microserviciosolicitudpago.entidad.EstadoPago;
-import com.helipagos.microserviciosolicitudpago.entidad.SolicitudPago;
+import static com.helipagos.microserviciosolicitudpago.enums.CodigoError.*;
 import com.helipagos.microserviciosolicitudpago.enums.Estado;
 import com.helipagos.microserviciosolicitudpago.excepcion.ErrorPersistenciaExepcion;
 import com.helipagos.microserviciosolicitudpago.excepcion.RecursoNoEncontradoExcepcion;
 import com.helipagos.microserviciosolicitudpago.repositorio.EstadoPagoRepositorio;
 import com.helipagos.microserviciosolicitudpago.servicio.IEstadoPagoServicio;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class EstadoPagoServicioImpl implements IEstadoPagoServicio {
 
     private final EstadoPagoRepositorio repositorio;
+    private final MessageSource mensajero;
 
     @Override
     public EstadoPago crear(Double importe) {
@@ -26,7 +30,8 @@ public class EstadoPagoServicioImpl implements IEstadoPagoServicio {
 
             return repositorio.save(estadoPago);
         }catch (Exception e) {
-            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+            throw new ErrorPersistenciaExepcion(
+                    mensajero.getMessage(PERSISTENCIA_ERROR.name(), null, Locale.getDefault()));
         }
     }
 
@@ -47,6 +52,7 @@ public class EstadoPagoServicioImpl implements IEstadoPagoServicio {
     @Override
     public EstadoPago buscarPorId(Long id) {
         return repositorio.findById(id).orElseThrow(
-                () -> new RecursoNoEncontradoExcepcion("Estado no encontrado."));
+                () -> new RecursoNoEncontradoExcepcion(
+                        mensajero.getMessage(RECURSO_NO_ENCONTRADO.name(), new Object[] { id }, Locale.getDefault())));
     }
 }
