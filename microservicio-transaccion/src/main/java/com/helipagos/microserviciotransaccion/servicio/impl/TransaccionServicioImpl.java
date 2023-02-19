@@ -1,13 +1,11 @@
 package com.helipagos.microserviciotransaccion.servicio.impl;
 
 import com.helipagos.microserviciotransaccion.entidad.EstadoTransaccion;
-import com.helipagos.microserviciotransaccion.excepcion.ErrorPersistenciaExepcion;
 import com.helipagos.microserviciotransaccion.excepcion.RecursoNoEncontradoExcepcion;
 import com.helipagos.microserviciotransaccion.excepcion.TransaccionInvalidaExcepcion;
 import com.helipagos.microserviciotransaccion.feing.ISolicitudPagoFeing;
 import com.helipagos.microserviciotransaccion.dto.TransaccionDto;
 import com.helipagos.microserviciotransaccion.entidad.Transaccion;
-import com.helipagos.microserviciotransaccion.repositorio.EstadoTransaccionRepositorio;
 import com.helipagos.microserviciotransaccion.repositorio.TransaccionRepositorio;
 import com.helipagos.microserviciotransaccion.servicio.IEstadoTransaccionServicio;
 import com.helipagos.microserviciotransaccion.servicio.ITransaccionServicio;
@@ -34,7 +32,7 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
     @Override
     public Transaccion realizarPago(TransaccionDto dto) {
         try {
-            if(repositorioTransaccion.existsById(dto.getSolicitudId())){
+            if(repositorioTransaccion.existsBySolicitudPagoId(dto.getSolicitudId())){
                 throw new TransaccionInvalidaExcepcion(
                         "Error: ya existe una transacción para el ID de la solicitud ingresada.");
             }
@@ -51,7 +49,7 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
                 Transaccion transaccion = new Transaccion();
                 transaccion.setFecha(LocalDateTime.now());
                 transaccion.setImporte(dto.getImporte());
-                transaccion.setSolicitudPagoId(dto.getSolicitudId());
+                transaccion.setSolicitudPagoId(solicitud.getId());
                 transaccion.setEstado(nuevoEstadoTransaccion);
 
                 nuevaTransaccion = repositorioTransaccion.save(transaccion);
@@ -65,7 +63,7 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
             return nuevaTransaccion;
 
         } catch (FeignException e) {
-            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+            throw new RecursoNoEncontradoExcepcion("No se ha encontrado la solicitud con el ID ingresado");
         }
     }
 
@@ -83,7 +81,7 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
                 Transaccion transaccion = new Transaccion();
                 transaccion.setFecha(LocalDateTime.now());
                 transaccion.setImporte(solicitud.getImporte());
-                transaccion.setSolicitudPagoId(id);
+                transaccion.setSolicitudPagoId(solicitud.getId());
                 transaccion.setEstado(nuevoEstadoTransaccion);
 
                 nuevaTransaccion = repositorioTransaccion.save(transaccion);
@@ -97,7 +95,7 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
             return nuevaTransaccion;
 
         } catch (FeignException e){
-            throw new ErrorPersistenciaExepcion("Hubo un problema en la persistencia de datos.");
+            throw new RecursoNoEncontradoExcepcion("No se ha encontrado la solicitud con el ID ingresado");
         }
     }
 
@@ -111,5 +109,4 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
     public List<Transaccion> listar() {
         return repositorioTransaccion.findAll();
     }
-
 }
