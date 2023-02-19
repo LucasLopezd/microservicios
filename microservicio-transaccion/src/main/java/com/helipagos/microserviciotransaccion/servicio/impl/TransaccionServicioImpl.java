@@ -1,6 +1,7 @@
 package com.helipagos.microserviciotransaccion.servicio.impl;
 
 import com.helipagos.microserviciotransaccion.entidad.EstadoTransaccion;
+import static com.helipagos.microserviciotransaccion.enums.CodigoError.*;
 import com.helipagos.microserviciotransaccion.excepcion.RecursoNoEncontradoExcepcion;
 import com.helipagos.microserviciotransaccion.excepcion.TransaccionInvalidaExcepcion;
 import com.helipagos.microserviciotransaccion.feing.ISolicitudPagoFeing;
@@ -16,10 +17,12 @@ import static com.helipagos.microserviciotransaccion.enums.Estado.*;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +31,14 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
     private final TransaccionRepositorio repositorioTransaccion;
     private final IEstadoTransaccionServicio estadoServicio;
     private final ISolicitudPagoFeing solicitudFeing;
+    private final MessageSource mensajero;
 
     @Override
     public Transaccion realizarPago(TransaccionDto dto) {
         try {
             if(repositorioTransaccion.existsBySolicitudPagoId(dto.getSolicitudId())){
                 throw new TransaccionInvalidaExcepcion(
-                        "Error: ya existe una transacción para el ID de la solicitud ingresada.");
+                        mensajero.getMessage(TRANSACCION_EXISTENTE.name(), null, Locale.getDefault()));
             }
 
             SolicitudPago solicitud = solicitudFeing.buscarSolicitudPorId(dto.getSolicitudId());
@@ -58,12 +62,13 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
 
             } else {
                 throw new TransaccionInvalidaExcepcion(
-                        "Error: La solicitud no es NUEVA o el importe ingresado no coincide con el importe de la solicitud.");
+                        mensajero.getMessage(TRANSACCION_INVALIDA.name(), null, Locale.getDefault()));
             }
             return nuevaTransaccion;
 
         } catch (FeignException e) {
-            throw new RecursoNoEncontradoExcepcion("No se ha encontrado la solicitud con el ID ingresado");
+            throw new RecursoNoEncontradoExcepcion(
+                    mensajero.getMessage(SOLICITUD_NO_ENCONTRADA.name(), null, Locale.getDefault()));
         }
     }
 
@@ -90,19 +95,21 @@ public class TransaccionServicioImpl implements ITransaccionServicio {
 
             } else {
                 throw new TransaccionInvalidaExcepcion(
-                        "Error: La solicitud no es NUEVA o la solicitud no fue encontrada con el ID ingresado.");
+                        mensajero.getMessage(TRANSACCION_EXISTENTE.name(), null, Locale.getDefault()));
             }
             return nuevaTransaccion;
 
         } catch (FeignException e){
-            throw new RecursoNoEncontradoExcepcion("No se ha encontrado la solicitud con el ID ingresado");
+            throw new RecursoNoEncontradoExcepcion(
+                    mensajero.getMessage(SOLICITUD_NO_ENCONTRADA.name(), null, Locale.getDefault()));
         }
     }
 
     @Override
     public Transaccion buscarPorId(Long id) {
         return repositorioTransaccion.findById(id).orElseThrow(
-                () -> new RecursoNoEncontradoExcepcion("Transaccion no encontrada."));
+                () -> new RecursoNoEncontradoExcepcion(
+                        mensajero.getMessage(TRANSACCION_NO_ENCONTRADA.name(), new Object[] { id }, Locale.getDefault())));
     }
 
     @Override
