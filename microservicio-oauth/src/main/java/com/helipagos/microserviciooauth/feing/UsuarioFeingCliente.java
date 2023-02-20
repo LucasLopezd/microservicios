@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UsuarioFeingCliente {
 
     @GetMapping("/api/usuarios/{username}")
-    public Usuario buscarPorUsername(@PathVariable String username);
+    Usuario buscarPorUsername(@PathVariable String username);
 }
